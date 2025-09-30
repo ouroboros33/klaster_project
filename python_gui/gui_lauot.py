@@ -1,1 +1,0 @@
-# pip install -r requirements.txt потом скачать в терминале библиотеки
