@@ -3,7 +3,7 @@ library(ggplot2)
 library(plotly)
 ui <- fluidPage(
 
-  titlePanel("Greetings"), # изменить после отладки
+  titlePanel("Marketing customer segmentatio"), 
 
   sidebarLayout(
     sidebarPanel(
