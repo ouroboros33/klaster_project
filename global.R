@@ -12,6 +12,6 @@ source("R/Clustering_methods.R")
 source("R/visualisation.R")
 
 # тестовые данные
-default_data <- read.csv("data/customers.csv")
+# default_data <- read.csv("data/customers.csv")
 
 install.packages("dplyr") # проблема Permission denied

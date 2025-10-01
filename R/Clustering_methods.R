@@ -1,10 +1,10 @@
 
-run_hclust(data){
+run_hclust <- {
 
 }
-run_kmeans(data, input$k){
+run_kmeans <- kmeans(x, y){
 
 }
-run_dbscan(data, eps = input$eps, minPts = input$minpts){
+run_dbscan <- d(data, eps = input$eps, minPts = input$minpts){
      
 }
