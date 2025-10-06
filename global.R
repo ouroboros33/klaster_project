@@ -14,4 +14,4 @@ source("R/visualisation.R")
 # тестовые данные
 # default_data <- read.csv("data/customers.csv")
 
-install.packages("dplyr") # проблема Permission denied
+install.packages("dbscan") # проблема Permission denied
