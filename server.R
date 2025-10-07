@@ -1,11 +1,11 @@
+library(shiny)
+library(shinythemes)
+
 server <- function(input, output, session) {
-  
-  # Таблица с загруженными данными
   output$summary <- renderTable({
     req(input$file)
     head(read.csv(input$file$datapath))
   })
-  
   # Основной обработчик кнопки "Run Analysis"
   observeEvent(input$run, {
     req(input$file)
@@ -14,9 +14,8 @@ server <- function(input, output, session) {
     data <- data %>% select_if(is.numeric)
     
     if (input$method == "K-means") {
-      # --- Запуск модели ---
+
       result <- run_kmeans(data, input$k)
-      # --- Визуализация ---
       output$cluster_Plot <- renderPlot({
         plot_clusters_kmeans(data, result)
       })
