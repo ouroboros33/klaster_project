@@ -15,3 +15,4 @@ plot_clusters_hclust <- function(data, result) {
     ggtitle("Hierarchical Clustering Results") +
     theme_minimal()
 }
+

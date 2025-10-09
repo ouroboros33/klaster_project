@@ -1,8 +1,10 @@
 library(shiny)
 library(shinythemes)
+thematic_shiny()
 
 ui <- fluidPage(
-  theme = shinytheme("flatly"),
+
+  theme = custom_theme,
   
   titlePanel("Marketing Customer Segmentation"),
   

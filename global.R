@@ -7,10 +7,13 @@ library("dplyr") # удобная работа с данными. //
 library("readr") # для загрузки CSV.
 library("shinythemes") # для красивых тем UI 
 library("factoextra")
+library("bslib") # замена shinythemes только с ручной настройкой
+library(thematic)
 
 # подключение своих функций
 source("R/Clustering_methods.R")
 source("R/visualisation.R")
+source("www/custom.R")
 
 # тестовые данные
 # default_data <- read.csv("data/customers.csv")
