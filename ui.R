@@ -6,11 +6,14 @@ ui <- fluidPage(
 
   theme = custom_theme,
   
-  titlePanel("Marketing Customer Segmentation"),
+ titlePanel("Marketing Customer Segmentation"),
   
   sidebarLayout(
     sidebarPanel(
-      fileInput("file", "Import CSV file"),
+      fileInput("file", "Import CSV file", accept = ".csv"),
+      
+      # Add data summary
+      verbatimTextOutput("dataSummary"),
       
       selectInput("method", "Method of Clusterization",
                   choices = c("K-means", "DBSCAN", "hierarchical")),
@@ -31,14 +34,14 @@ ui <- fluidPage(
                     choices = c("complete", "single", "average", "ward.D2")),
         numericInput("k", "Number of clusters", value = 3, min = 2, max = 10)
       ),
-      
-      actionButton("run", "Run Analysis")
+      actionButton("run", "Run Analysis"),
+      actionButton("exit", "Exit")
     ),
     
     mainPanel(
       plotOutput("cluster_Plot"),
       tableOutput("summary"),
-      textOutput("info")
+      verbatimTextOutput("info")
     )
   )
 )

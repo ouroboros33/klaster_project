@@ -4,11 +4,11 @@ library("plotly")
 library("dbscan") # метод DBSCAN.
 library("stats") # для k-means и иерархической кластеризации.
 library("dplyr") # удобная работа с данными. //
-library("readr") # для загрузки CSV.
+library("readr") # для загрузки CSV.    
 library("shinythemes") # для красивых тем UI 
 library("factoextra")
 library("bslib") # замена shinythemes только с ручной настройкой
-library(thematic)
+library("thematic")
 
 # подключение своих функций
 source("R/Clustering_methods.R")
