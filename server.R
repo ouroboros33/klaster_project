@@ -1,58 +1,48 @@
 library(shiny)
 library(dplyr)
 library(readr)
-library(cluster)    # для silhouette, если используете evaluate_clustering
+library(cluster)
 library(factoextra)
 library(dbscan)
-thematic_shiny()
-# ВАЖНО: убедитесь, что функции из R/Clustering_methods.R и R/visualisation.R
-# корректно подключаются (вы уже делаете source() в global.R)
 
 server <- function(input, output, session) {
 
-  # реактивное хранилище для исходных данных
   dataset <- reactiveVal(NULL)
+  built_plots <- reactiveVal(list())
 
-  # загрузка CSV по событию input$file
   observeEvent(input$file, {
     req(input$file)
     tryCatch({
       data <- readr::read_csv(input$file$datapath, show_col_types = FALSE)
-      # убираем нечисловые пОшибка при чтении файларизнаки — k-means/DBSCAN требуют чисел
-      num_data <- dplyr::select_if(data, is.numeric)
+      numeric_data <- dplyr::select(data, where(is.numeric))
 
-      if (ncol(num_data) == 0) {
+      if (ncol(numeric_data) == 0) {
         showNotification(
-          "The downloaded file does not contain 
-          any numeric columns for clustering.",
+          "There is no numeric data for clustering.",
           type = "error"
         )
         dataset(NULL)
       } else {
-        dataset(num_data)
+        dataset(numeric_data)
       }
-    },
-    error = function(e) {
+    }, error = function(e) {
       showNotification(
-        paste("Error while reading file:", e$message),
+        paste("Read data error:", e$message),
         type = "error"
       )
       dataset(NULL)
     })
   })
 
-  # краткая сводка по данным
   output$dataSummary <- renderPrint({
-    data <- dataset()
-    req(data)
-    summary(data)
+    req(dataset())
+    summary(dataset())
   })
 
-  # запуск анализа по нажатию кнопки Run Analysis
   run_result <- eventReactive(input$run, {
     data <- dataset()
     validate(
-      need(!is.null(data), "please, import CSV file with numeric data.")
+      need(!is.null(data), "Please, import CSV-file with data")
     )
 
     method <- input$method
@@ -63,7 +53,6 @@ server <- function(input, output, session) {
         model <- run_kmeans(data, k = input$k)
         list(
           method = "K-means",
-          model = model,
           cluster = model$cluster,
           plot = plot_clusters_kmeans(data, model)
         )
@@ -72,7 +61,6 @@ server <- function(input, output, session) {
         model <- run_dbscan(data, eps = input$eps, minPts = input$minpts)
         list(
           method = "DBSCAN",
-          model = model,
           cluster = model$cluster,
           plot = plot_clusters_dbscan(data, model)
         )
@@ -80,27 +68,54 @@ server <- function(input, output, session) {
       "hierarchical" = {
         result <- run_hclust(data, linkage = input$linkage, k = input$k)
         list(
-          method = paste("Hierarchical (", input$linkage, ")", sep = ""),
-          model = result$model,
+          method = paste0("Hierarchical (", input$linkage, ")"),
           cluster = result$cluster,
           plot = plot_clusters_hclust(data, result)
         )
       },
       {
-        validate(FALSE, "Uknown clusterization method.")
+        validate(FALSE, "Unknowm method of clustering")
       }
     )
   }, ignoreNULL = TRUE)
 
-  # график кластеров
-  output$cluster_Plot <- renderPlot({
-   image(volcano, col = thematic_get_option("sequential"))
+  observeEvent(run_result(), {
     res <- run_result()
-    req(res$plot)
-    res$plot
+    plots <- built_plots()
+    tab_title <- sprintf("Plot %d – %s", length(plots) + 1, res$method)
+    plots[[tab_title]] <- res$plot
+    built_plots(plots)
   })
 
-  # таблица со сводной статистикой по кластерам
+  output$plots_tabset <- renderUI({
+    plots <- built_plots()
+    if (length(plots) == 0) {
+      return(h4("No plots yet."))
+    }
+
+    tabs <- lapply(seq_along(plots), function(i) {
+      tabPanel(
+        title = names(plots)[i],
+        plotOutput(outputId = paste0("cluster_plot_", i), height = "420px")
+      )
+    })
+
+    do.call(tabsetPanel, c(list(id = "cluster_plots_tabs", type = "tabs"), tabs))
+  })
+
+  observe({
+    plots <- built_plots()
+    lapply(seq_along(plots), function(i) {
+      local({
+        idx <- i
+        output[[paste0("cluster_plot_", idx)]] <- renderPlot({
+          req(built_plots())
+          built_plots()[[idx]]
+        })
+      })
+    })
+  })
+
   output$summary <- renderTable({
     res <- run_result()
     req(res$cluster)
@@ -118,32 +133,25 @@ server <- function(input, output, session) {
       )
   })
 
-  # текстовая информация, метрики качества
   output$info <- renderPrint({
     res <- run_result()
     req(res$cluster)
     data <- dataset()
     req(data)
 
+    metrics <- evaluate_clustering(data, res$cluster)
+
+    cat(
+      "Method:", res$method, "\n",
+      "Number of clusters:", metrics$n_clusters, "\n",
+      "Silhouette:", metrics$silhouette, "\n"
+    )
+
     if (res$method == "DBSCAN") {
-      metrics <- evaluate_clustering(data, res$cluster)
-      cat(
-        "Method:", res$method, "\n",
-        "Number of clusters (without noise):", metrics$n_clusters, "\n",
-        "Silhouette:", metrics$silhouette, "\n",
-        "noise %:", metrics$noise_ratio, "\n"
-      )
-    } else {
-      metrics <- evaluate_clustering(data, res$cluster)
-      cat(
-        "Method:", res$method, "\n",
-        "Number of clusters:", metrics$n_clusters, "\n",
-        "Silhouette:", metrics$silhouette, "\n"
-      )
+      cat("Noise (%):", metrics$noise_ratio, "\n")
     }
   })
 
-  # обработчик кнопки Exit
   observeEvent(input$exit, {
     stopApp()
   })

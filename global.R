@@ -15,6 +15,13 @@ source("R/Clustering_methods.R")
 source("R/visualisation.R")
 source("www/custom.R")
 
+# themes for plots
+thematic::thematic_shiny(
+  font = "Open Sans",
+  bg = "#000000",
+  fg = "#ffd700",
+  accent = "#d40612"
+)
 # тестовые данные
 # default_data <- read.csv("data/customers.csv")
 
