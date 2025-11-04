@@ -4,7 +4,7 @@ library(readr)
 library(cluster)    # для silhouette, если используете evaluate_clustering
 library(factoextra)
 library(dbscan)
-
+thematic_shiny()
 # ВАЖНО: убедитесь, что функции из R/Clustering_methods.R и R/visualisation.R
 # корректно подключаются (вы уже делаете source() в global.R)
 
@@ -94,6 +94,7 @@ server <- function(input, output, session) {
 
   # график кластеров
   output$cluster_Plot <- renderPlot({
+   image(volcano, col = thematic_get_option("sequential"))
     res <- run_result()
     req(res$plot)
     res$plot
@@ -117,7 +118,7 @@ server <- function(input, output, session) {
       )
   })
 
-  # текстовая информация, например метрики качества
+  # текстовая информация, метрики качества
   output$info <- renderPrint({
     res <- run_result()
     req(res$cluster)

@@ -1,4 +1,3 @@
-# Содержимое R/visualisation.R
 plot_clusters_kmeans <- function(data, model) {
   require(factoextra)
   fviz_cluster(list(data = scale(data), cluster = model$cluster)) +

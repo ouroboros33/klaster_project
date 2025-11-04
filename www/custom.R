@@ -15,5 +15,13 @@ custom_theme <- bs_theme(
   heading_font = font_google("Roboto")
 )
 
+# custom plots
+thematic_shiny(
+  bg = "#b6161e",
+  fg = "#ffd700",
+  accent = "#23e4fe",
+  font = "Open Sans"
+)
+
 # to synchronise themes with plots
 thematic_on(bg = "auto", fg = "auto", accent = "auto")
