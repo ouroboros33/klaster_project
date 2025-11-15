@@ -17,6 +17,20 @@ run_dbscan <- function(data, eps = 0.5, minPts = 5) {
   dbscan::dbscan(data_scaled, eps = eps, minPts = minPts)
 }
 
+# scatter-plot for hierarchial
+# run_hclust <- function(data, linkage = "ward.D2", k = 3) {
+#   data_scaled <- scale(data)
+#   data_scaled <- data_scaled[complete.cases(data_scaled), ]
+#   if (nrow(data_scaled) < 2) {
+#     stop("Not enough data points for hierarchical clustering")
+#   }
+#   d <- dist(data_scaled)
+#   hc <- hclust(d, method = linkage)
+#   cluster_assignments <- cutree(hc, k = k)
+#   list(model = hc, cluster = cluster_assignments)
+# }
+
+# дендрограмма для hierarchial 
 run_hclust <- function(data, linkage = "ward.D2", k = 3) {
   data_scaled <- scale(data)
   data_scaled <- data_scaled[complete.cases(data_scaled), ]
@@ -26,7 +40,7 @@ run_hclust <- function(data, linkage = "ward.D2", k = 3) {
   d <- dist(data_scaled)
   hc <- hclust(d, method = linkage)
   cluster_assignments <- cutree(hc, k = k)
-  list(model = hc, cluster = cluster_assignments)
+  list(model = hc, cluster = cluster_assignments, d = d, k = k)
 }
 
 evaluate_clustering <- function(data, labels) {

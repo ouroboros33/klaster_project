@@ -13,7 +13,8 @@ ui <- fluidPage(
       ),
       conditionalPanel(
         condition = "input.method == 'K-means'",
-        numericInput("k", "Number of clusters", value = 3, min = 2, max = 10)
+        numericInput("k", "Number of clusters", value = 3, min = 2, max = 10),
+        actionButton("albow", "create albow plot")
       ),
       conditionalPanel(
         condition = "input.method == 'DBSCAN'",
@@ -29,10 +30,11 @@ ui <- fluidPage(
           "linkage", "Link method:",
           choices = c("complete", "single", "average", "ward.D2")
         ),
-        numericInput("k", "Number of clusters", value = 3, min = 2, max = 10)
+        numericInput("k_hier", "Number of clusters", value = 3,
+                     min = 2, max = 10) 
       ),
       actionButton("run", "Run Analysis"),
-      actionButton("exit", "Exit")
+      actionButton("clear", "Clear plots")
     ),
     
     mainPanel(

@@ -66,11 +66,14 @@ server <- function(input, output, session) {
         )
       },
       "hierarchical" = {
-        result <- run_hclust(data, linkage = input$linkage, k = input$k)
+        result <- run_hclust(data, linkage = input$linkage, k = input$k_hier)
         list(
           method = paste0("Hierarchical (", input$linkage, ")"),
           cluster = result$cluster,
-          plot = plot_clusters_hclust(data, result)
+          plot = list(
+            dendrogram = plot_dendrogram_hclust(result),
+            pca = plot_clusters_hclust(data, result)
+          )
         )
       },
       {
@@ -79,13 +82,21 @@ server <- function(input, output, session) {
     )
   }, ignoreNULL = TRUE)
 
-  observeEvent(run_result(), {
-    res <- run_result()
-    plots <- built_plots()
-    tab_title <- sprintf("Plot %d – %s", length(plots) + 1, res$method)
-    plots[[tab_title]] <- res$plot
-    built_plots(plots)
-  })
+observeEvent(run_result(), {
+  res <- run_result()
+  plots <- built_plots()
+  base_title <- sprintf("Plot %d – %s", length(plots) + 1, res$method)
+
+  if (is.list(res$plot) && !inherits(res$plot, "gg")) {
+    # Иерархическая: две вкладки
+    plots[[paste0(base_title, " – Dendrogram")]] <- res$plot$dendrogram
+    plots[[paste0(base_title, " – PCA")]] <- res$plot$pca
+  } else {
+    # Один график
+    plots[[base_title]] <- res$plot
+  }
+  built_plots(plots)
+})
 
   output$plots_tabset <- renderUI({
     plots <- built_plots()
@@ -103,18 +114,17 @@ server <- function(input, output, session) {
     do.call(tabsetPanel, c(list(id = "cluster_plots_tabs", type = "tabs"), tabs))
   })
 
-  observe({
-    plots <- built_plots()
-    lapply(seq_along(plots), function(i) {
-      local({
-        idx <- i
-        output[[paste0("cluster_plot_", idx)]] <- renderPlot({
-          req(built_plots())
-          built_plots()[[idx]]
-        })
-      })
+observe({
+  plots <- built_plots()
+  lapply(seq_along(plots), function(i) {
+    local({
+      idx <- i
+      output[[paste0("cluster_plot_", idx)]] <- renderPlot({
+        plots[[idx]]  # Убрал req() и изменил на прямое обращение
+      }, height = 420)
     })
   })
+})
 
   output$summary <- renderTable({
     res <- run_result()
@@ -152,7 +162,7 @@ server <- function(input, output, session) {
     }
   })
 
-  observeEvent(input$exit, {
-    stopApp()
+  observeEvent(input$clear, {
+    built_plots(list())
   })
 }

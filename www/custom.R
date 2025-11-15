@@ -16,4 +16,4 @@ custom_theme <- bs_theme(
 )
 
 # to synchronise themes with plots
-thematic_on(bg = "auto", fg = "auto", accent = "auto")
+# thematic_on(bg = "auto", fg = "auto", accent = "auto")
